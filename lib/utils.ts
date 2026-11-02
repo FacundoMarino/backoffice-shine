@@ -17,6 +17,27 @@ export function formatDate(iso: string): string {
   }
 }
 
+export function namirialStatusLabel(status: string): string {
+  switch (status) {
+    case "CREATED":
+      return "Creada";
+    case "DRAFT":
+      return "Borrador";
+    case "RUNNING":
+      return "En curso";
+    case "COMPLETED":
+      return "Completada";
+    case "FAILED":
+      return "Fallida";
+    case "CANCELLED":
+      return "Cancelada";
+    case "EXPIRED":
+      return "Vencida";
+    default:
+      return status;
+  }
+}
+
 export function verificationLabel(status: string): string {
   switch (status) {
     case "PENDING":

@@ -4,8 +4,8 @@ import { fetchVerifications } from "@/actions/admin";
 import { PageTitle } from "@/components/layout/page-title";
 import { Card } from "@/components/ui/card";
 import { StatusChip } from "@/components/ui/status-chip";
-import { toneForVerification } from "@/lib/status-tones";
-import { formatDate, verificationLabel } from "@/lib/utils";
+import { toneForNamirial, toneForVerification } from "@/lib/status-tones";
+import { formatDate, namirialStatusLabel, verificationLabel } from "@/lib/utils";
 import { VerificationFilters } from "@/components/verificacion/filters";
 
 type Props = {
@@ -77,11 +77,17 @@ export default async function VerificacionPage({ searchParams }: Props) {
               </div>
               <div className="text-[#374151]">{p.ciudad}</div>
               <div className="text-[#374151]">{formatDate(p.fechaSolicitud)}</div>
-              <div>
+              <div className="flex flex-col items-start gap-1">
                 <StatusChip
                   label={verificationLabel(p.estado)}
                   tone={toneForVerification(p.estado)}
                 />
+                {p.namirialStatus ? (
+                  <StatusChip
+                    label={namirialStatusLabel(p.namirialStatus)}
+                    tone={toneForNamirial(p.namirialStatus)}
+                  />
+                ) : null}
               </div>
             </Link>
           ))

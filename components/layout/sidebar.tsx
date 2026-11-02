@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   ListChecks,
   MapPin,
+  ReceiptText,
   ShieldCheck,
   Star,
   Users,
@@ -21,6 +22,7 @@ const NAV = [
   { href: "/servicios", label: "Servicios", icon: ListChecks },
   { href: "/ubicaciones", label: "Ubicaciones", icon: MapPin },
   { href: "/planes", label: "Planes de suscripción", icon: CreditCard },
+  { href: "/suscripciones", label: "Suscripciones pagas", icon: ReceiptText },
   { href: "/resenas", label: "Reseñas", icon: Star },
 ] as const;
 
@@ -28,7 +30,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col gap-7 border-r border-[var(--sidebar-border)] bg-sidebar px-4 py-6">
+    <aside className="sticky top-0 flex h-screen w-60 shrink-0 flex-col gap-7 border-r border-(--sidebar-border) bg-sidebar px-4 py-6">
       <div className="flex items-center gap-1.5 px-2">
         <span className="text-[17px] font-extrabold tracking-tight text-foreground">
           CLEAN

@@ -6,6 +6,7 @@ import { PageTitle } from "@/components/layout/page-title";
 import { Card } from "@/components/ui/card";
 import { StatusChip } from "@/components/ui/status-chip";
 import { VerificationActions } from "@/components/verificacion/actions";
+import { NamirialPanel } from "@/components/verificacion/namirial-panel";
 import { toneForVerification } from "@/lib/status-tones";
 import { verificationLabel } from "@/lib/utils";
 
@@ -155,19 +156,30 @@ export default async function VerificacionDetailPage({ params }: Props) {
             <p className="text-sm text-muted-foreground">Sin documentos cargados</p>
           ) : (
             <div className="flex flex-col gap-3">
-              {p.documentos.map((d) => (
-                <a
-                  key={d.id}
-                  href={d.fileUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-semibold text-primary hover:underline"
-                >
-                  {d.docType} — {d.status}
-                </a>
-              ))}
+              {p.documentos.map((d) =>
+                d.fileUrl.startsWith("http") ? (
+                  <a
+                    key={d.id}
+                    href={d.fileUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-semibold text-primary hover:underline"
+                  >
+                    {d.docType} — {d.status}
+                  </a>
+                ) : (
+                  <div
+                    key={d.id}
+                    className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-semibold"
+                  >
+                    {d.docType} — {d.status}
+                  </div>
+                ),
+              )}
             </div>
           )}
+
+          <NamirialPanel workerId={p.id} identidad={p.identidad} />
         </Card>
       </div>
     </>

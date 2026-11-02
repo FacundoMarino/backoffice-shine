@@ -46,6 +46,7 @@ export async function fetchVerifications(params?: {
       ciudad: string;
       fechaSolicitud: string;
       estado: string;
+      namirialStatus?: string | null;
     }[]
   >(`/admin/verifications${qs ? `?${qs}` : ""}`);
 }
@@ -73,7 +74,37 @@ export async function fetchVerification(id: string) {
       status: string;
     }[];
     rejectionReason: string | null;
+    identidad: {
+      requestId: string;
+      status: string;
+      terminationReason: string | null;
+      message: string | null;
+      summary: {
+        firstName: string | null;
+        lastName: string | null;
+        documentNumber: string | null;
+        expiryDate: string | null;
+        nationality: string | null;
+        documentType: string | null;
+        birthDate: string | null;
+      } | null;
+      resources: {
+        label: string;
+        url: string | null;
+        status: string | null;
+        expiresAt: string | null;
+      }[];
+    } | null;
   }>(`/admin/verifications/${id}`);
+}
+
+export async function syncIdentityVerification(id: string) {
+  const result = await authedFetch(`/admin/verifications/${id}/sync-identity`, {
+    method: "POST",
+  });
+  revalidatePath("/verificacion");
+  revalidatePath(`/verificacion/${id}`);
+  return result;
 }
 
 export async function approveVerification(id: string) {
@@ -107,6 +138,7 @@ export async function fetchWorkers() {
       id: string;
       userId: string;
       nombre: string;
+      email: string;
       tipo: string;
       ciudad: string;
       verificationStatus: string;
@@ -239,10 +271,18 @@ export async function fetchPlans() {
     {
       id: string;
       name: string;
+      audience: "CLIENT" | "WORKER";
       durationMonths: number;
       price: number;
+      currency: string;
+      contactQuota: number | null;
+      annualDiscountPercent: number | null;
+      isFeatured: boolean;
+      trialDays: number;
       description: string | null;
       isActive: boolean;
+      stripeProductId: string | null;
+      stripePriceId: string | null;
     }[]
   >("/admin/plans");
 }
@@ -250,8 +290,13 @@ export async function fetchPlans() {
 export async function savePlan(input: {
   id?: string;
   name: string;
+  audience: "CLIENT" | "WORKER";
   durationMonths: number;
   price: number;
+  contactQuota?: number | null;
+  annualDiscountPercent?: number | null;
+  isFeatured?: boolean;
+  trialDays?: number;
   description?: string;
   isActive: boolean;
 }) {
@@ -271,6 +316,59 @@ export async function savePlan(input: {
 export async function deletePlan(id: string) {
   const result = await authedFetch(`/admin/plans/${id}`, { method: "DELETE" });
   revalidatePath("/planes");
+  return result;
+}
+
+export async function fetchSubscriptions(params?: {
+  status?: "NONE" | "ACTIVE" | "PAUSED";
+  planId?: string;
+}) {
+  const sp = new URLSearchParams();
+  if (params?.status) sp.set("status", params.status);
+  if (params?.planId) sp.set("planId", params.planId);
+  const qs = sp.toString();
+
+  return authedFetch<
+    {
+      id: string;
+      stripeSubscriptionId: string | null;
+      stripeStatus: string | null;
+      worker: {
+        id: string;
+        name: string;
+        email: string;
+        subscriptionStatus: string;
+      };
+      plan: { id: string; name: string; durationMonths: number } | null;
+      price: number;
+      currency: string;
+      startsAt: string;
+      renewsAt: string | null;
+      currentPeriodEnd: string | null;
+      isActive: boolean;
+      createdAt: string;
+    }[]
+  >(`/admin/subscriptions${qs ? `?${qs}` : ""}`);
+}
+
+export async function activateSubscription(input: {
+  workerProfileId: string;
+  planCatalogId: string;
+}) {
+  const result = await authedFetch("/admin/subscriptions/activate", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  revalidatePath("/suscripciones");
+  return result;
+}
+
+export async function pauseSubscription(subscriptionId: string) {
+  const result = await authedFetch(
+    `/admin/subscriptions/${subscriptionId}/pause`,
+    { method: "POST" },
+  );
+  revalidatePath("/suscripciones");
   return result;
 }
 
