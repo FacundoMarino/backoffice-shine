@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
 import { deletePlan, savePlan } from "@/actions/admin";
@@ -43,7 +43,24 @@ const emptyForm = {
 };
 
 const inputClass =
-  "rounded-xl border border-input bg-background px-3 py-2.5 text-sm";
+  "w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm";
+
+const labelClass = "mb-1 block text-sm font-medium text-foreground";
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className={labelClass}>{label}</span>
+      {children}
+    </label>
+  );
+}
 
 export function PlansManager({ initial }: { initial: Plan[] }) {
   const router = useRouter();
@@ -205,50 +222,60 @@ export function PlansManager({ initial }: { initial: Plan[] }) {
               {editing ? "Editar plan" : "Nuevo plan"}
             </h3>
             <div className="flex flex-col gap-3">
-              <input
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="Nombre"
-                className={inputClass}
-              />
-              <select
-                value={form.audience}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    audience: e.target.value as PlanAudience,
-                  }))
-                }
-                className={inputClass}
-              >
-                <option value="CLIENT">Cliente / Familia</option>
-                <option value="WORKER">Personal de limpieza</option>
-              </select>
-              <select
-                value={form.durationMonths}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    durationMonths: Number(e.target.value),
-                  }))
-                }
-                className={inputClass}
-              >
-                <option value={1}>Mensual (1 mes)</option>
-                <option value={6}>Semestral (6 meses)</option>
-                <option value={12}>Anual (12 meses)</option>
-              </select>
-              <input
-                type="number"
-                min={0}
-                step="0.01"
-                value={form.price}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, price: Number(e.target.value) }))
-                }
-                placeholder="Precio (€)"
-                className={inputClass}
-              />
+              <Field label="Nombre">
+                <input
+                  value={form.name}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, name: e.target.value }))
+                  }
+                  placeholder="Ej. Plan Estándar"
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Audiencia">
+                <select
+                  value={form.audience}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      audience: e.target.value as PlanAudience,
+                    }))
+                  }
+                  className={inputClass}
+                >
+                  <option value="CLIENT">Cliente / Familia</option>
+                  <option value="WORKER">Personal de limpieza</option>
+                </select>
+              </Field>
+              <Field label="Duración">
+                <select
+                  value={form.durationMonths}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      durationMonths: Number(e.target.value),
+                    }))
+                  }
+                  className={inputClass}
+                >
+                  <option value={1}>Mensual (1 mes)</option>
+                  <option value={6}>Semestral (6 meses)</option>
+                  <option value={12}>Anual (12 meses)</option>
+                </select>
+              </Field>
+              <Field label="Precio (€)">
+                <input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.price}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, price: Number(e.target.value) }))
+                  }
+                  placeholder="0.00"
+                  className={inputClass}
+                />
+              </Field>
               <label className="flex items-center gap-2 text-sm font-medium">
                 <input
                   type="checkbox"
@@ -263,48 +290,54 @@ export function PlansManager({ initial }: { initial: Plan[] }) {
                 Contactos ilimitados
               </label>
               {!form.unlimitedQuota ? (
+                <Field label="Contactos por periodo">
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.contactQuota}
+                    onChange={(e) =>
+                      setForm((f) => ({
+                        ...f,
+                        contactQuota: e.target.value,
+                      }))
+                    }
+                    placeholder="Ej. 5"
+                    className={inputClass}
+                  />
+                </Field>
+              ) : null}
+              <Field label="Descuento anual % (opcional)">
                 <input
                   type="number"
                   min={0}
-                  value={form.contactQuota}
+                  max={100}
+                  step="0.01"
+                  value={form.annualDiscountPercent}
                   onChange={(e) =>
                     setForm((f) => ({
                       ...f,
-                      contactQuota: e.target.value,
+                      annualDiscountPercent: e.target.value,
                     }))
                   }
-                  placeholder="Visualizaciones / contactos por periodo"
+                  placeholder="Ej. 10"
                   className={inputClass}
                 />
-              ) : null}
-              <input
-                type="number"
-                min={0}
-                max={100}
-                step="0.01"
-                value={form.annualDiscountPercent}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    annualDiscountPercent: e.target.value,
-                  }))
-                }
-                placeholder="Descuento anual % (opcional)"
-                className={inputClass}
-              />
-              <input
-                type="number"
-                min={0}
-                value={form.trialDays}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    trialDays: Number(e.target.value),
-                  }))
-                }
-                placeholder="Días de trial"
-                className={inputClass}
-              />
+              </Field>
+              <Field label="Días de trial">
+                <input
+                  type="number"
+                  min={0}
+                  value={form.trialDays}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      trialDays: Number(e.target.value),
+                    }))
+                  }
+                  placeholder="0"
+                  className={inputClass}
+                />
+              </Field>
               <label className="flex items-center gap-2 text-sm font-medium">
                 <input
                   type="checkbox"
@@ -315,15 +348,17 @@ export function PlansManager({ initial }: { initial: Plan[] }) {
                 />
                 Destacado en listados (Pro limpieza)
               </label>
-              <textarea
-                value={form.description}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, description: e.target.value }))
-                }
-                placeholder="Descripción"
-                rows={3}
-                className={inputClass}
-              />
+              <Field label="Descripción">
+                <textarea
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, description: e.target.value }))
+                  }
+                  placeholder="Texto opcional del plan"
+                  rows={3}
+                  className={inputClass}
+                />
+              </Field>
               <label className="flex items-center gap-2 text-sm font-medium">
                 <input
                   type="checkbox"
